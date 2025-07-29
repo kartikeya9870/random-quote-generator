@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Real Quotes Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+</head>
+<body class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 min-h-screen m-0">
+  <div id="root" class="h-screen flex items-center justify-center"></div>
+
+  <script>
+    const { useState, useEffect } = React;
+
+    const realQuotes = [
+      { content: "The best way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+      { content: "Don't let yesterday take up too much of today.", author: "Will Rogers" },
+      { content: "It’s not whether you get knocked down, it’s whether you get up.", author: "Vince Lombardi" },
+      { content: "If you are working on something exciting, it will keep you motivated.", author: "Steve Jobs" },
+      { content: "Success is not in what you have, but who you are.", author: "Bo Bennett" },
+      { content: "The harder you work for something, the greater you’ll feel when you achieve it.", author: "Unknown" },
+      { content: "Dream bigger. Do bigger.", author: "Unknown" },
+      { content: "Don’t watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+      { content: "Start where you are. Use what you have. Do what you can.", author: "Arthur Ashe" },
+      { content: "Try not to become a man of success. Rather become a man of value.", author: "Albert Einstein" },
+      
+    ];
+
+    function QuoteGenerator() {
+      const [quote, setQuote] = useState(realQuotes[0]);
+      const [voices, setVoices] = useState([]);
+      const [selectedVoice, setSelectedVoice] = useState(null);
+      const [voiceDropdownVisible, setVoiceDropdownVisible] = useState(false);
+
+      const getRandomQuote = () => {
+        const random = Math.floor(Math.random() * realQuotes.length);
+        setQuote(realQuotes[random]);
+      };
+
+      const speak = () => {
+        const msg = new SpeechSynthesisUtterance(`"${quote.content}" by ${quote.author}`);
+        if (selectedVoice) msg.voice = selectedVoice;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(msg);
+      };
+
+      const copy = () => {
+        navigator.clipboard.writeText(`"${quote.content}" — ${quote.author}`);
+        alert("Quote copied!");
+      };
+
+      const tweet = () => {
+        const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`"${quote.content}" — ${quote.author}`)}`;
+        window.open(url, "_blank");
+      };
+
+      const shareWhatsApp = () => {
+        const message = `"${quote.content}" — ${quote.author}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, "_blank");
+      };
+
+      const shareInstagram = () => {
+        alert("📸 Instagram doesn't allow direct share. Please:\n1. Click Copy\n2. Open Instagram\n3. Paste in your story or post.");
+      };
+
+      useEffect(() => {
+        const loadVoices = () => {
+          const voiceList = window.speechSynthesis.getVoices();
+          setVoices(voiceList);
+          if (voiceList.length > 0 && !selectedVoice) {
+            setSelectedVoice(voiceList[0]);
+          }
+        };
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+      }, []);
+
+      return React.createElement(
+        "div",
+        { className: "bg-white rounded-2xl shadow-xl p-8 max-w-xl w-full text-center" },
+        React.createElement("h1", { className: "text-3xl font-bold text-gray-800 mb-4 flex justify-center items-center gap-2" },
+          React.createElement("span", { className: "text-2xl" }, "🎙️"),
+          "Random Quote"
+        ),
+        React.createElement("p", { className: "text-xl text-gray-700 italic mb-6" }, `"${quote.content}"`),
+        React.createElement("p", { className: "text-sm text-gray-600 mb-4" }, `— ${quote.author}`),
+
+        React.createElement("div", { className: "flex flex-wrap justify-center gap-3 mb-4" }, [
+          React.createElement("button", {
+            onClick: getRandomQuote,
+            className: "bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-full shadow"
+          }, "🔁 New"),
+
+          React.createElement("button", {
+            onClick: speak,
+            className: "bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow"
+          }, "🔊 Speak"),
+
+          React.createElement("button", {
+            onClick: copy,
+            className: "bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full shadow"
+          }, "📋 Copy"),
+
+          React.createElement("button", {
+            onClick: tweet,
+            className: "bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-full shadow"
+          }, "🐦 Tweet"),
+
+          React.createElement("button", {
+            onClick: shareWhatsApp,
+            className: "bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-full shadow"
+          }, "📲 WhatsApp"),
+
+          React.createElement("button", {
+            onClick: shareInstagram,
+            className: "bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-full shadow"
+          }, "📸 Instagram"),
+
+          React.createElement("div", { className: "relative" },
+            React.createElement("button", {
+              onClick: () => setVoiceDropdownVisible(!voiceDropdownVisible),
+              className: "bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-full shadow"
+            }, "🗣️ Voice 🔽"),
+            voiceDropdownVisible && React.createElement("div", {
+              className: "absolute z-10 mt-2 w-64 bg-white border rounded shadow text-left overflow-auto max-h-60"
+            },
+              voices.map((v, i) =>
+                React.createElement("div", {
+                  key: i,
+                  className: "px-4 py-2 hover:bg-gray-200 cursor-pointer text-sm",
+                  onClick: () => {
+                    setSelectedVoice(v);
+                    setVoiceDropdownVisible(false);
+                  }
+                }, `${v.name} (${v.lang})`)
+              )
+            )
+          )
+        ])
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(
+      React.createElement(QuoteGenerator)
+    );
+  </script>
+</body>
+</html>
